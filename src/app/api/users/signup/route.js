@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import connect from '../../../../dbconfig/dbConfig'
 import User from '../../../models/userModel'
 import bcrypt from 'bcryptjs'
+import { sendEmail } from '@/helpers/mailer'
 export  async function POST(request) {
     try {
         connect()
@@ -15,6 +16,8 @@ export  async function POST(request) {
         const hashedPassword = await bcrypt.hash(password,10);
 
         const newUser =await User.create({username,email,password:hashedPassword})
+
+        await sendEmail({email,emailType:"VERIFY",userId:newUser._id})
 
         return NextResponse.json({newUser})
 
